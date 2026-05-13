@@ -1,0 +1,144 @@
+Error en run_sync_job para OLT 1: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_onu_model_profiles_model_name"
+DETAIL:  Key (model_name)=(XPON-WIFI-REDCATV) already exists.
+
+[SQL: INSERT INTO onu_model_profiles (vendor, model_name, olt_type_name, detected_count, first_seen_at, last_seen_at, source_olt_id, supports_wifi, supports_catv, supports_router, supports_bridge, supports_tr069, supports_omci, supports_pppoe_router, defau ... 3533 characters truncated ... 6, sen_counter) ORDER BY sen_counter RETURNING onu_model_profiles.id, onu_model_profiles.id AS id__1]
+[parameters: {'last_extracted_from_onu__0': None, 'default_service_profile__0': None, 'first_seen_at__0': datetime.datetime(2026, 5, 8, 18, 8, 5, 897831), 'supports_pppoe_router__0': False, 'supports_wifi__0': True, 'vendor__0': 'Generic/Unknown', 'detected_count__0': 1, 'olt_type_name__0': 'XPON-WIFI-REDCATV', 'notes__0': None, 'last_extracted_at__0': None, 'supports_router__0': False, 'default_gemport__0': None, 'supports_tr069__0': False, 'source_olt_id__0': 1, 'model_name__0': 'XPON-WIFI-REDCATV', 'last_extracted_config__0': None, 'provisioning_template_id__0': None, 'supports_catv__0': True, 'default_vlan_mode__0': None, 'config_template_id__0': None, 'default_tcont_profile__0': None, 'supports_bridge__0': True, 'default_line_profile__0': None, 'certification_status__0': 'detected', 'last_seen_at__0': datetime.datetime(2026, 5, 8, 18, 8, 5, 897836), 'supports_omci__0': True, 'default_eth_mode__0': None, 'last_extracted_from_onu__1': None, 'default_service_profile__1': None, 'first_seen_at__1': datetime.datetime(2026, 5, 8, 18, 8, 5, 897838), 'supports_pppoe_router__1': False, 'supports_wifi__1': True, 'vendor__1': 'RedLink/Unknown', 'detected_count__1': 1, 'olt_type_name__1': 'RL804GW-WIFI-CATV', 'notes__1': None, 'last_extracted_at__1': None, 'supports_router__1': False, 'default_gemport__1': None, 'supports_tr069__1': False, 'source_olt_id__1': 1, 'model_name__1': 'RL804GW-WIFI-CATV', 'last_extracted_config__1': None, 'provisioning_template_id__1': None, 'supports_catv__1': True, 'default_vlan_mode__1': None, 'config_template_id__1': None, 'default_tcont_profile__1': None, 'supports_bridge__1': True, 'default_line_profile__1': None ... 8 parameters truncated ... 'supports_wifi__2': True, 'vendor__2': 'Generic/Unknown', 'detected_count__2': 1, 'olt_type_name__2': 'XPON-WIFI-REDCATV', 'notes__2': None, 'last_extracted_at__2': None, 'supports_router__2': False, 'default_gemport__2': None, 'supports_tr069__2': False, 'source_olt_id__2': 1, 'model_name__2': 'XPON-WIFI-REDCATV', 'last_extracted_config__2': None, 'provisioning_template_id__2': None, 'supports_catv__2': True, 'default_vlan_mode__2': None, 'config_template_id__2': None, 'default_tcont_profile__2': None, 'supports_bridge__2': True, 'default_line_profile__2': None, 'certification_status__2': 'detected', 'last_seen_at__2': datetime.datetime(2026, 5, 8, 18, 8, 5, 897841), 'supports_omci__2': True, 'default_eth_mode__2': None, 'last_extracted_from_onu__3': None, 'default_service_profile__3': None, 'first_seen_at__3': datetime.datetime(2026, 5, 8, 18, 8, 5, 897843), 'supports_pppoe_router__3': False, 'supports_wifi__3': True, 'vendor__3': 'Generic/Unknown', 'detected_count__3': 1, 'olt_type_name__3': 'XPON-WIFI-REDCATV', 'notes__3': None, 'last_extracted_at__3': None, 'supports_router__3': False, 'default_gemport__3': None, 'supports_tr069__3': False, 'source_olt_id__3': 1, 'model_name__3': 'XPON-WIFI-REDCATV', 'last_extracted_config__3': None, 'provisioning_template_id__3': None, 'supports_catv__3': True, 'default_vlan_mode__3': None, 'config_template_id__3': None, 'default_tcont_profile__3': None, 'supports_bridge__3': True, 'default_line_profile__3': None, 'certification_status__3': 'detected', 'last_seen_at__3': datetime.datetime(2026, 5, 8, 18, 8, 5, 897844), 'supports_omci__3': True, 'default_eth_mode__3': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2125, in _exec_insertmany_context
+    dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "ix_onu_model_profiles_model_name"
+DETAIL:  Key (model_name)=(XPON-WIFI-REDCATV) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/app/core/scheduler.py", line 254, in run_sync_job
+    db.commit()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4331, in flush
+    self._flush(objects)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4427, in _flush
+    flush_context.execute()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 1143, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1844, in _execute_context
+    return self._exec_insertmany_context(dialect, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2133, in _exec_insertmany_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2125, in _exec_insertmany_context
+    dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_onu_model_profiles_model_name"
+DETAIL:  Key (model_name)=(XPON-WIFI-REDCATV) already exists.
+
+[SQL: INSERT INTO onu_model_profiles (vendor, model_name, olt_type_name, detected_count, first_seen_at, last_seen_at, source_olt_id, supports_wifi, supports_catv, supports_router, supports_bridge, supports_tr069, supports_omci, supports_pppoe_router, defau ... 3533 characters truncated ... 6, sen_counter) ORDER BY sen_counter RETURNING onu_model_profiles.id, onu_model_profiles.id AS id__1]
+[parameters: {'last_extracted_from_onu__0': None, 'default_service_profile__0': None, 'first_seen_at__0': datetime.datetime(2026, 5, 8, 18, 8, 5, 897831), 'supports_pppoe_router__0': False, 'supports_wifi__0': True, 'vendor__0': 'Generic/Unknown', 'detected_count__0': 1, 'olt_type_name__0': 'XPON-WIFI-REDCATV', 'notes__0': None, 'last_extracted_at__0': None, 'supports_router__0': False, 'default_gemport__0': None, 'supports_tr069__0': False, 'source_olt_id__0': 1, 'model_name__0': 'XPON-WIFI-REDCATV', 'last_extracted_config__0': None, 'provisioning_template_id__0': None, 'supports_catv__0': True, 'default_vlan_mode__0': None, 'config_template_id__0': None, 'default_tcont_profile__0': None, 'supports_bridge__0': True, 'default_line_profile__0': None, 'certification_status__0': 'detected', 'last_seen_at__0': datetime.datetime(2026, 5, 8, 18, 8, 5, 897836), 'supports_omci__0': True, 'default_eth_mode__0': None, 'last_extracted_from_onu__1': None, 'default_service_profile__1': None, 'first_seen_at__1': datetime.datetime(2026, 5, 8, 18, 8, 5, 897838), 'supports_pppoe_router__1': False, 'supports_wifi__1': True, 'vendor__1': 'RedLink/Unknown', 'detected_count__1': 1, 'olt_type_name__1': 'RL804GW-WIFI-CATV', 'notes__1': None, 'last_extracted_at__1': None, 'supports_router__1': False, 'default_gemport__1': None, 'supports_tr069__1': False, 'source_olt_id__1': 1, 'model_name__1': 'RL804GW-WIFI-CATV', 'last_extracted_config__1': None, 'provisioning_template_id__1': None, 'supports_catv__1': True, 'default_vlan_mode__1': None, 'config_template_id__1': None, 'default_tcont_profile__1': None, 'supports_bridge__1': True, 'default_line_profile__1': None ... 8 parameters truncated ... 'supports_wifi__2': True, 'vendor__2': 'Generic/Unknown', 'detected_count__2': 1, 'olt_type_name__2': 'XPON-WIFI-REDCATV', 'notes__2': None, 'last_extracted_at__2': None, 'supports_router__2': False, 'default_gemport__2': None, 'supports_tr069__2': False, 'source_olt_id__2': 1, 'model_name__2': 'XPON-WIFI-REDCATV', 'last_extracted_config__2': None, 'provisioning_template_id__2': None, 'supports_catv__2': True, 'default_vlan_mode__2': None, 'config_template_id__2': None, 'default_tcont_profile__2': None, 'supports_bridge__2': True, 'default_line_profile__2': None, 'certification_status__2': 'detected', 'last_seen_at__2': datetime.datetime(2026, 5, 8, 18, 8, 5, 897841), 'supports_omci__2': True, 'default_eth_mode__2': None, 'last_extracted_from_onu__3': None, 'default_service_profile__3': None, 'first_seen_at__3': datetime.datetime(2026, 5, 8, 18, 8, 5, 897843), 'supports_pppoe_router__3': False, 'supports_wifi__3': True, 'vendor__3': 'Generic/Unknown', 'detected_count__3': 1, 'olt_type_name__3': 'XPON-WIFI-REDCATV', 'notes__3': None, 'last_extracted_at__3': None, 'supports_router__3': False, 'default_gemport__3': None, 'supports_tr069__3': False, 'source_olt_id__3': 1, 'model_name__3': 'XPON-WIFI-REDCATV', 'last_extracted_config__3': None, 'provisioning_template_id__3': None, 'supports_catv__3': True, 'default_vlan_mode__3': None, 'config_template_id__3': None, 'default_tcont_profile__3': None, 'supports_bridge__3': True, 'default_line_profile__3': None, 'certification_status__3': 'detected', 'last_seen_at__3': datetime.datetime(2026, 5, 8, 18, 8, 5, 897844), 'supports_omci__3': True, 'default_eth_mode__3': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/app/core/scheduler.py", line 281, in run_sync_job
+    olt.consecutive_sync_failures += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py", line 569, in __get__
+    return self.impl.get(state, dict_)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py", line 1096, in get
+    value = self._fire_loader_callables(state, key, passive)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py", line 1126, in _fire_loader_callables
+    return state._load_expired(state, passive)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/state.py", line 828, in _load_expired
+    self.manager.expired_attribute_loader(self, toload, passive)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/loading.py", line 1674, in load_scalar_attributes
+    result = load_on_ident(
+             ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/loading.py", line 510, in load_on_ident
+    return load_on_pk_identity(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2239, in _execute_internal
+    conn = self._connection_for_bind(bind)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2108, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 101, in _go
+    self._raise_for_prerequisite_state(fn.__name__, current_state)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 971, in _raise_for_prerequisite_state
+    raise sa_exc.PendingRollbackError(
+sqlalchemy.exc.PendingRollbackError: This Session's transaction has been rolled back due to a previous exception during flush. To begin a new transaction with this Session, first issue Session.rollback(). Original exception was: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_onu_model_profiles_model_name"
+DETAIL:  Key (model_name)=(XPON-WIFI-REDCATV) already exists.
+
+[SQL: INSERT INTO onu_model_profiles (vendor, model_name, olt_type_name, detected_count, first_seen_at, last_seen_at, source_olt_id, supports_wifi, supports_catv, supports_router, supports_bridge, supports_tr069, supports_omci, supports_pppoe_router, defau ... 3533 characters truncated ... 6, sen_counter) ORDER BY sen_counter RETURNING onu_model_profiles.id, onu_model_profiles.id AS id__1]
+[parameters: {'last_extracted_from_onu__0': None, 'default_service_profile__0': None, 'first_seen_at__0': datetime.datetime(2026, 5, 8, 18, 8, 5, 897831), 'supports_pppoe_router__0': False, 'supports_wifi__0': True, 'vendor__0': 'Generic/Unknown', 'detected_count__0': 1, 'olt_type_name__0': 'XPON-WIFI-REDCATV', 'notes__0': None, 'last_extracted_at__0': None, 'supports_router__0': False, 'default_gemport__0': None, 'supports_tr069__0': False, 'source_olt_id__0': 1, 'model_name__0': 'XPON-WIFI-REDCATV', 'last_extracted_config__0': None, 'provisioning_template_id__0': None, 'supports_catv__0': True, 'default_vlan_mode__0': None, 'config_template_id__0': None, 'default_tcont_profile__0': None, 'supports_bridge__0': True, 'default_line_profile__0': None, 'certification_status__0': 'detected', 'last_seen_at__0': datetime.datetime(2026, 5, 8, 18, 8, 5, 897836), 'supports_omci__0': True, 'default_eth_mode__0': None, 'last_extracted_from_onu__1': None, 'default_service_profile__1': None, 'first_seen_at__1': datetime.datetime(2026, 5, 8, 18, 8, 5, 897838), 'supports_pppoe_router__1': False, 'supports_wifi__1': True, 'vendor__1': 'RedLink/Unknown', 'detected_count__1': 1, 'olt_type_name__1': 'RL804GW-WIFI-CATV', 'notes__1': None, 'last_extracted_at__1': None, 'supports_router__1': False, 'default_gemport__1': None, 'supports_tr069__1': False, 'source_olt_id__1': 1, 'model_name__1': 'RL804GW-WIFI-CATV', 'last_extracted_config__1': None, 'provisioning_template_id__1': None, 'supports_catv__1': True, 'default_vlan_mode__1': None, 'config_template_id__1': None, 'default_tcont_profile__1': None, 'supports_bridge__1': True, 'default_line_profile__1': None ... 8 parameters truncated ... 'supports_wifi__2': True, 'vendor__2': 'Generic/Unknown', 'detected_count__2': 1, 'olt_type_name__2': 'XPON-WIFI-REDCATV', 'notes__2': None, 'last_extracted_at__2': None, 'supports_router__2': False, 'default_gemport__2': None, 'supports_tr069__2': False, 'source_olt_id__2': 1, 'model_name__2': 'XPON-WIFI-REDCATV', 'last_extracted_config__2': None, 'provisioning_template_id__2': None, 'supports_catv__2': True, 'default_vlan_mode__2': None, 'config_template_id__2': None, 'default_tcont_profile__2': None, 'supports_bridge__2': True, 'default_line_profile__2': None, 'certification_status__2': 'detected', 'last_seen_at__2': datetime.datetime(2026, 5, 8, 18, 8, 5, 897841), 'supports_omci__2': True, 'default_eth_mode__2': None, 'last_extracted_from_onu__3': None, 'default_service_profile__3': None, 'first_seen_at__3': datetime.datetime(2026, 5, 8, 18, 8, 5, 897843), 'supports_pppoe_router__3': False, 'supports_wifi__3': True, 'vendor__3': 'Generic/Unknown', 'detected_count__3': 1, 'olt_type_name__3': 'XPON-WIFI-REDCATV', 'notes__3': None, 'last_extracted_at__3': None, 'supports_router__3': False, 'default_gemport__3': None, 'supports_tr069__3': False, 'source_olt_id__3': 1, 'model_name__3': 'XPON-WIFI-REDCATV', 'last_extracted_config__3': None, 'provisioning_template_id__3': None, 'supports_catv__3': True, 'default_vlan_mode__3': None, 'config_template_id__3': None, 'default_tcont_profile__3': None, 'supports_bridge__3': True, 'default_line_profile__3': None, 'certification_status__3': 'detected', 'last_seen_at__3': datetime.datetime(2026, 5, 8, 18, 8, 5, 897844), 'supports_omci__3': True, 'default_eth_mode__3': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj) (Background on this error at: https://sqlalche.me/e/20/7s2a)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/test_sync.py", line 8, in main
+    await run_sync_job(1, 'deep', 'manual')
+  File "/app/app/core/scheduler.py", line 302, in run_sync_job
+    db.commit()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 101, in _go
+    self._raise_for_prerequisite_state(fn.__name__, current_state)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 971, in _raise_for_prerequisite_state
+    raise sa_exc.PendingRollbackError(
+sqlalchemy.exc.PendingRollbackError: This Session's transaction has been rolled back due to a previous exception during flush. To begin a new transaction with this Session, first issue Session.rollback(). Original exception was: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_onu_model_profiles_model_name"
+DETAIL:  Key (model_name)=(XPON-WIFI-REDCATV) already exists.
+
+[SQL: INSERT INTO onu_model_profiles (vendor, model_name, olt_type_name, detected_count, first_seen_at, last_seen_at, source_olt_id, supports_wifi, supports_catv, supports_router, supports_bridge, supports_tr069, supports_omci, supports_pppoe_router, defau ... 3533 characters truncated ... 6, sen_counter) ORDER BY sen_counter RETURNING onu_model_profiles.id, onu_model_profiles.id AS id__1]
+[parameters: {'last_extracted_from_onu__0': None, 'default_service_profile__0': None, 'first_seen_at__0': datetime.datetime(2026, 5, 8, 18, 8, 5, 897831), 'supports_pppoe_router__0': False, 'supports_wifi__0': True, 'vendor__0': 'Generic/Unknown', 'detected_count__0': 1, 'olt_type_name__0': 'XPON-WIFI-REDCATV', 'notes__0': None, 'last_extracted_at__0': None, 'supports_router__0': False, 'default_gemport__0': None, 'supports_tr069__0': False, 'source_olt_id__0': 1, 'model_name__0': 'XPON-WIFI-REDCATV', 'last_extracted_config__0': None, 'provisioning_template_id__0': None, 'supports_catv__0': True, 'default_vlan_mode__0': None, 'config_template_id__0': None, 'default_tcont_profile__0': None, 'supports_bridge__0': True, 'default_line_profile__0': None, 'certification_status__0': 'detected', 'last_seen_at__0': datetime.datetime(2026, 5, 8, 18, 8, 5, 897836), 'supports_omci__0': True, 'default_eth_mode__0': None, 'last_extracted_from_onu__1': None, 'default_service_profile__1': None, 'first_seen_at__1': datetime.datetime(2026, 5, 8, 18, 8, 5, 897838), 'supports_pppoe_router__1': False, 'supports_wifi__1': True, 'vendor__1': 'RedLink/Unknown', 'detected_count__1': 1, 'olt_type_name__1': 'RL804GW-WIFI-CATV', 'notes__1': None, 'last_extracted_at__1': None, 'supports_router__1': False, 'default_gemport__1': None, 'supports_tr069__1': False, 'source_olt_id__1': 1, 'model_name__1': 'RL804GW-WIFI-CATV', 'last_extracted_config__1': None, 'provisioning_template_id__1': None, 'supports_catv__1': True, 'default_vlan_mode__1': None, 'config_template_id__1': None, 'default_tcont_profile__1': None, 'supports_bridge__1': True, 'default_line_profile__1': None ... 8 parameters truncated ... 'supports_wifi__2': True, 'vendor__2': 'Generic/Unknown', 'detected_count__2': 1, 'olt_type_name__2': 'XPON-WIFI-REDCATV', 'notes__2': None, 'last_extracted_at__2': None, 'supports_router__2': False, 'default_gemport__2': None, 'supports_tr069__2': False, 'source_olt_id__2': 1, 'model_name__2': 'XPON-WIFI-REDCATV', 'last_extracted_config__2': None, 'provisioning_template_id__2': None, 'supports_catv__2': True, 'default_vlan_mode__2': None, 'config_template_id__2': None, 'default_tcont_profile__2': None, 'supports_bridge__2': True, 'default_line_profile__2': None, 'certification_status__2': 'detected', 'last_seen_at__2': datetime.datetime(2026, 5, 8, 18, 8, 5, 897841), 'supports_omci__2': True, 'default_eth_mode__2': None, 'last_extracted_from_onu__3': None, 'default_service_profile__3': None, 'first_seen_at__3': datetime.datetime(2026, 5, 8, 18, 8, 5, 897843), 'supports_pppoe_router__3': False, 'supports_wifi__3': True, 'vendor__3': 'Generic/Unknown', 'detected_count__3': 1, 'olt_type_name__3': 'XPON-WIFI-REDCATV', 'notes__3': None, 'last_extracted_at__3': None, 'supports_router__3': False, 'default_gemport__3': None, 'supports_tr069__3': False, 'source_olt_id__3': 1, 'model_name__3': 'XPON-WIFI-REDCATV', 'last_extracted_config__3': None, 'provisioning_template_id__3': None, 'supports_catv__3': True, 'default_vlan_mode__3': None, 'config_template_id__3': None, 'default_tcont_profile__3': None, 'supports_bridge__3': True, 'default_line_profile__3': None, 'certification_status__3': 'detected', 'last_seen_at__3': datetime.datetime(2026, 5, 8, 18, 8, 5, 897844), 'supports_omci__3': True, 'default_eth_mode__3': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj) (Background on this error at: https://sqlalche.me/e/20/7s2a)
