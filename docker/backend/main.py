@@ -1,5 +1,6 @@
 import docker
 import os
+import re
 import subprocess
 import yaml
 import shutil
@@ -7,27 +8,59 @@ import psutil
 import time
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
 
 # ==================================================
 # APP CONFIGURATION & MIDDLEWARE
 # ==================================================
-app = FastAPI(title="NexusOps Docker NOC API")
+APP_ENV = os.getenv("APP_ENV", "development")
+STACKS_DIR = os.getenv("STACKS_DIR", "/app/stacks")
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "http://localhost:3030,http://localhost:8081").split(",")
+    if origin.strip()
+]
+STACK_NAME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$")
+
+app = FastAPI(
+    title="NexusOps Docker NOC API",
+    description="Backend operativo para gestion Docker, stacks y monitoreo de NexusOps.",
+    version="0.1.0",
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS if APP_ENV != "development" else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+os.makedirs(STACKS_DIR, exist_ok=True)
+
 def get_docker_client():
     try:
-        return docker.from_env()
+        client = docker.from_env()
+        client.ping()
+        return client
     except Exception as e:
         print(f"Docker connection error: {e}")
         return None
+
+def validate_stack_name(name: str) -> str:
+    normalized = name.lower().strip()
+    if not STACK_NAME_PATTERN.match(normalized):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid stack name. Use 3-64 chars: lowercase letters, numbers and dashes. It must start and end with a letter or number.",
+        )
+    return normalized
+
+def run_compose_command(args: list[str]):
+    process = subprocess.run(args, capture_output=True, text=True)
+    if process.returncode != 0:
+        error_msg = process.stderr.strip() or process.stdout.strip() or "Unknown compose error"
+        raise HTTPException(status_code=500, detail=error_msg)
+    return process
 
 # ==================================================
 # SYSTEM HEALTH & OVERVIEW ENDPOINTS
@@ -38,6 +71,7 @@ def home():
     if not client:
         return {
             "project": "NexusOps",
+            "environment": APP_ENV,
             "docker_engine": "Offline",
             "containers": 0,
             "services": "Offline"
@@ -47,6 +81,7 @@ def home():
         running = len([c for c in containers if c.status == "running"])
         return {
             "project": "NexusOps",
+            "environment": APP_ENV,
             "docker_engine": "Active",
             "containers": len(containers),
             "services": "Online" if running > 0 else "Offline"
@@ -56,7 +91,13 @@ def home():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "timestamp": time.time()}
+    client = get_docker_client()
+    return {
+        "status": "ok",
+        "timestamp": time.time(),
+        "docker_engine": "online" if client else "offline",
+        "environment": APP_ENV,
+    }
 
 @app.get("/stats")
 def stats():
@@ -166,8 +207,9 @@ def get_container_logs(container_id: str, tail: int = 100):
     client = get_docker_client()
     if not client: raise HTTPException(status_code=503, detail="Docker Daemon Offline")
     try:
+        safe_tail = min(max(tail, 10), 1000)
         c = client.containers.get(container_id)
-        logs = c.logs(tail=tail, timestamps=True).decode("utf-8")
+        logs = c.logs(tail=safe_tail, timestamps=True).decode("utf-8", errors="replace")
         return {"logs": logs}
     except docker.errors.NotFound:
         raise HTTPException(status_code=404, detail="Container not found")
@@ -210,37 +252,29 @@ def delete_image(image_id: str):
 # ==================================================
 # STACKS (COMPOSE) DEPLOYMENT ENDPOINTS
 # ==================================================
-STACKS_DIR = "/app/stacks"
-os.makedirs(STACKS_DIR, exist_ok=True)
-
 @app.post("/stacks/deploy")
 async def deploy_stack(name: str = Form(...), file: UploadFile = File(...)):
-    name = name.lower().strip()
-    if not name or not name.isalnum() and "-" not in name:
-        raise HTTPException(status_code=400, detail="Invalid stack name. Use alphanumeric and dashes.")
-        
+    name = validate_stack_name(name)
     stack_path = os.path.join(STACKS_DIR, name)
+    compose_file_path = os.path.join(stack_path, "docker-compose.yml")
     
-    # Check if stack is already running even if folder is missing
     client = get_docker_client()
     if client:
         existing = [c for c in client.containers.list(all=True) if c.labels.get("com.docker.compose.project") == name]
         if existing and os.path.exists(stack_path):
-             raise HTTPException(status_code=400, detail="Stack name already active in Docker and Filesystem")
+             raise HTTPException(status_code=400, detail="Stack name already active in Docker and filesystem")
 
-    # Cleanup existing directory if it's a "ghost" (no containers but folder exists)
     if os.path.exists(stack_path):
         shutil.rmtree(stack_path)
         
     os.makedirs(stack_path, exist_ok=True)
-    compose_file_path = os.path.join(stack_path, "docker-compose.yml")
     
     try:
         content = await file.read()
         try:
             yaml_content = yaml.safe_load(content)
-            if not isinstance(yaml_content, dict) or ("services" not in yaml_content and "version" not in yaml_content):
-                raise ValueError("Not a valid docker-compose structure")
+            if not isinstance(yaml_content, dict) or "services" not in yaml_content:
+                raise ValueError("Not a valid docker-compose structure. Missing services section.")
         except Exception as ye:
             shutil.rmtree(stack_path)
             raise HTTPException(status_code=400, detail=f"Invalid YAML file: {str(ye)}")
@@ -248,17 +282,7 @@ async def deploy_stack(name: str = Form(...), file: UploadFile = File(...)):
         with open(compose_file_path, "wb") as f:
             f.write(content)
             
-        process = subprocess.run(
-            ["docker", "compose", "-p", name, "-f", compose_file_path, "up", "-d"], 
-            capture_output=True, 
-            text=True
-        )
-        
-        if process.returncode != 0:
-            shutil.rmtree(stack_path)
-            error_msg = process.stderr if process.stderr else "Unknown compose error"
-            raise HTTPException(status_code=500, detail=f"Deploy failed: {error_msg}")
-            
+        run_compose_command(["docker", "compose", "-p", name, "-f", compose_file_path, "up", "-d"])
         return {"message": "Stack deployed successfully", "name": name}
     except HTTPException:
         raise
@@ -273,7 +297,6 @@ def list_stacks():
     if not client: raise HTTPException(status_code=503, detail="Docker Daemon Offline")
     
     try:
-        # 1. Get all containers to match projects
         all_containers = client.containers.list(all=True)
         docker_stacks = {}
         for c in all_containers:
@@ -286,22 +309,18 @@ def list_stacks():
                 if c.status == "running":
                     docker_stacks[proj]["running"] += 1
                 
-                # Collect ports
                 if c.ports:
                     for k, v in c.ports.items():
                         if v:
                             port_map = f"{v[0]['HostPort']}:{k.split('/')[0]}"
                             docker_stacks[proj]["ports"].add(port_map)
 
-        # 2. Scan Filesystem for defined stacks
         result = []
         if os.path.exists(STACKS_DIR):
             for name in os.listdir(STACKS_DIR):
                 full_path = os.path.join(STACKS_DIR, name)
                 if os.path.isdir(full_path):
-                    # Get creation time
                     created_at = os.path.getctime(full_path)
-                    
                     stack_info = {
                         "name": name,
                         "containers": 0,
@@ -312,7 +331,6 @@ def list_stacks():
                         "path": full_path
                     }
                     
-                    # Merge with Docker data
                     if name in docker_stacks:
                         d_data = docker_stacks[name]
                         stack_info["containers"] = d_data["containers"]
@@ -328,7 +346,6 @@ def list_stacks():
                     
                     result.append(stack_info)
         
-        # 3. Add External Stacks
         for proj_name, d_data in docker_stacks.items():
             if not any(r["name"] == proj_name for r in result):
                 result.append({
@@ -347,35 +364,33 @@ def list_stacks():
 
 @app.delete("/stacks/{name}")
 def delete_stack(name: str):
+    name = validate_stack_name(name)
     stack_path = os.path.join(STACKS_DIR, name)
     compose_file_path = os.path.join(stack_path, "docker-compose.yml")
     
     try:
-        # 1. Attempt Docker Compose Down
         if os.path.exists(compose_file_path):
             subprocess.run(["docker", "compose", "-p", name, "-f", compose_file_path, "down"], capture_output=True)
         else:
-            # Try by project name if file is missing
             subprocess.run(["docker", "compose", "-p", name, "down"], capture_output=True)
 
-        # 2. Force removal of containers associated with project (extra safety)
         client = get_docker_client()
         if client:
             proj_containers = [c for c in client.containers.list(all=True) if c.labels.get("com.docker.compose.project") == name]
             for c in proj_containers:
                 try:
                     c.remove(force=True)
-                except:
+                except Exception:
                     pass
 
-        # 3. ALWAYS Clean up the directory
         if os.path.exists(stack_path):
             shutil.rmtree(stack_path)
             
         return {"message": f"Stack {name} and its assets have been fully purged."}
     except Exception as e:
-        # Even if docker fails, try to remove the folder as a last resort
         if os.path.exists(stack_path):
-            try: shutil.rmtree(stack_path)
-            except: pass
-        raise HTTPException(status_code=500, detail=f"Failed to fully purge stack: {str(e)}")
+            try:
+                shutil.rmtree(stack_path)
+            except Exception:
+                pass
+        raise HTTPException(status_code=500, detail=f"Failed to fully purge stack: {str(e)}")
